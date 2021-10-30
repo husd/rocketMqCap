@@ -1,0 +1,2 @@
+# view-package
+为了研究rocketMQ原理，所以写的一个抓包分析工具，可以解析nameserver和broker等之间的数据交互
