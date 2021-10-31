@@ -18,7 +18,7 @@ func StartTrace(port int) {
 	for {
 		channelMap.Range(func(key, value interface{}) bool {
 			if _, ok := threadMap.Load(key); !ok {
-				go readMQProtocol(value.(chan *layers.TCP), handleMqMessage, fmt.Sprintf("源IP:端口 %s 监听目的端口: %d", key, port))
+				go readMQProtocol(value.(chan *layers.TCP), handleMqMessage, fmt.Sprintf("源IP:端口 %s 监听目的端口: %d", key, port), port)
 				threadMap.Store(key, true)
 			}
 			return true

@@ -10,6 +10,13 @@ import "github.com/google/gopacket/layers"
 const mqprotocol_fix_len = 8
 const max int = 4 // 4
 
+type tcp_direction_type int
+
+const (
+	req  tcp_direction_type = 1 //请求包
+	resp tcp_direction_type = 2 //响应包
+)
+
 type rocketMQProtocol struct {
 	length            int // 消息长度：总长度，四个字节存储，占用一个int类型
 	serializationType int // 序列化类型 1个字节
@@ -17,9 +24,28 @@ type rocketMQProtocol struct {
 
 	header      []byte // 消息头数据：经过序列化后的消息头数据
 	messageBody []byte // 消息主体数据：消息主体的二进制字节数据内容
+
+	direction tcp_direction_type
 }
 
-func readMQProtocol(ch chan *layers.TCP, f func(*rocketMQProtocol, string), name string) {
+type rocketMQHeader struct {
+	Code      int
+	Language  string
+	Version   int
+	Opaque    int
+	Flag      int
+	Remark    string
+	ExtFields map[string]string
+}
+
+func newRocketMQHeader() *rocketMQHeader {
+
+	res := &rocketMQHeader{}
+
+	return res
+}
+
+func readMQProtocol(ch chan *layers.TCP, f func(*rocketMQProtocol, string, tcp_direction_type), name string, capPort int) {
 
 outer:
 	mq := &rocketMQProtocol{}
@@ -75,7 +101,14 @@ outer:
 					bodyOk = true
 				}
 				if fixOk && headerOk && bodyOk {
-					f(mq, name)
+
+					dstPort := int(tcp.DstPort)
+					dire := resp
+					if dstPort == capPort {
+						dire = req
+					}
+
+					f(mq, name, dire)
 					//这里已经要注意，数组里可能还有数据呢，所以要继续处理
 					goto outer
 				}

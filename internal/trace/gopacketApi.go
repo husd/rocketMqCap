@@ -46,7 +46,8 @@ func printDevice(deviceName string, r *rule) {
 	packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
 	packetSource.NoCopy = true
 	for packet := range packetSource.Packets() {
-		if packet.NetworkLayer() == nil || packet.TransportLayer() == nil || packet.TransportLayer().LayerType() != layers.LayerTypeTCP {
+		if packet.NetworkLayer() == nil || packet.TransportLayer() == nil ||
+			packet.TransportLayer().LayerType() != layers.LayerTypeTCP {
 			fmt.Println("unexpected packet")
 			continue
 		}
