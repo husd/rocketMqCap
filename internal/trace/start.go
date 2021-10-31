@@ -3,6 +3,7 @@ package trace
 import (
 	"fmt"
 	"github.com/google/gopacket/layers"
+	"sync"
 )
 
 /**
@@ -15,17 +16,18 @@ func StartTrace(port int) {
 	captureByPort(port)
 	//captureSend2Broker()
 	for {
-		for k, ch := range channelMap {
-			if _, ok := threadMap[k]; !ok {
-				go readMQProtocol(ch, handleMqMessage, fmt.Sprintf("源IP:端口 %s 监听目的端口: %d", k, port))
-				threadMap[k] = true
+		channelMap.Range(func(key, value interface{}) bool {
+			if _, ok := threadMap.Load(key); !ok {
+				go readMQProtocol(value.(chan *layers.TCP), handleMqMessage, fmt.Sprintf("源IP:端口 %s 监听目的端口: %d", key, port))
+				threadMap.Store(key, true)
 			}
-		}
+			return true
+		})
 	}
 }
 
-var channelMap = make(map[string]chan *layers.TCP)
-var threadMap = make(map[string]bool)
+var channelMap = sync.Map{}
+var threadMap = sync.Map{}
 
 func captureByPort(port int) {
 

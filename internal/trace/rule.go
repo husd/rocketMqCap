@@ -33,11 +33,14 @@ func NewSend2Broker(ip string, port uint16) *rule {
 func doRuleHandle(srcIp string, tcp *layers.TCP) {
 
 	key := srcIp + ":" + tcp.SrcPort.String()
-	if _, ok := channelMap[key]; !ok {
-		channel := make(chan *layers.TCP, 1024)
-		channelMap[key] = channel
+	var channel chan *layers.TCP
+	if value, ok := channelMap.Load(key); !ok {
+		channel = make(chan *layers.TCP, 1024)
+		channelMap.Store(key, channel)
+	} else {
+		channel = value.(chan *layers.TCP)
 	}
-	ch := channelMap[key]
+	ch := channel
 	ch <- tcp
 }
 

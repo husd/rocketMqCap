@@ -45,8 +45,6 @@ func printDevice(deviceName string, r *rule) {
 	// 抓包
 	packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
 	packetSource.NoCopy = true
-	//fmt.Printf("device:%v, snapLen:%v, port:%v\n", deviceName, snapLen, port)
-	//fmt.Println("filter:", filter)
 	for packet := range packetSource.Packets() {
 		if packet.NetworkLayer() == nil || packet.TransportLayer() == nil || packet.TransportLayer().LayerType() != layers.LayerTypeTCP {
 			fmt.Println("unexpected packet")
@@ -56,13 +54,6 @@ func printDevice(deviceName string, r *rule) {
 		tcp := packet.TransportLayer().(*layers.TCP)
 		ip := packet.NetworkLayer().(*layers.IPv4)
 		srcIp := ip.SrcIP.String()
-		//srcId := packet.NetworkLayer().
-		//ip := packet.Lay
-		//fmt.Printf("device:%v filter:%s tcp:%v \n", deviceName,filter,tcp)
-		// tcp payload，也即是tcp传输的数据
-		//fmt.Printf("tcp payload:%v \n", tcp.Payload)
-		//这里可能会有多个连接，所以要区分，KEY就是 srcIp:port-dstIp:port
-		//由于 dstIp:port 是一样的，所以需要srcIp:port即可
 		r.ruleHandle(srcIp, tcp)
 	}
 }
