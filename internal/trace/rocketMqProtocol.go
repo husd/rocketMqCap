@@ -1,5 +1,7 @@
 package trace
 
+import "github.com/google/gopacket/layers"
+
 /**
  * RocketMQ 的基本通信协议
  * @author hushengdong
@@ -17,7 +19,7 @@ type rocketMQProtocol struct {
 	messageBody []byte // 消息主体数据：消息主体的二进制字节数据内容
 }
 
-func readMQProtocol(ch chan []byte, f func(*rocketMQProtocol)) {
+func readMQProtocol(ch chan *layers.TCP, f func(*rocketMQProtocol, string), name string) {
 
 outer:
 	mq := &rocketMQProtocol{}
@@ -33,7 +35,8 @@ outer:
 	bodyLength := 0
 
 	for {
-		if data, ok := <-ch; ok {
+		if tcp, ok := <-ch; ok {
+			data := tcp.LayerPayload()
 			pos := 0
 			dataLen := len(data)
 			for pos < dataLen {
@@ -72,7 +75,7 @@ outer:
 					bodyOk = true
 				}
 				if fixOk && headerOk && bodyOk {
-					f(mq)
+					f(mq, name)
 					//这里已经要注意，数组里可能还有数据呢，所以要继续处理
 					goto outer
 				}

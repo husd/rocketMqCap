@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"husd.com/trace/trace"
 )
@@ -11,6 +12,8 @@ import (
  */
 func main() {
 
-	fmt.Println("------------- start -----------------")
-	trace.StartTrace()
+	port := flag.Int("port", 9876, "监听的端口，默认是9876")
+	flag.Parse()
+	fmt.Println("------------- start -----------------port:", *port)
+	trace.StartTrace(*port)
 }

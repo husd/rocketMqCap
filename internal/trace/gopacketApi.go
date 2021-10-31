@@ -54,9 +54,15 @@ func printDevice(deviceName string, r *rule) {
 		}
 		// tcp 层
 		tcp := packet.TransportLayer().(*layers.TCP)
+		ip := packet.NetworkLayer().(*layers.IPv4)
+		srcIp := ip.SrcIP.String()
+		//srcId := packet.NetworkLayer().
+		//ip := packet.Lay
 		//fmt.Printf("device:%v filter:%s tcp:%v \n", deviceName,filter,tcp)
 		// tcp payload，也即是tcp传输的数据
 		//fmt.Printf("tcp payload:%v \n", tcp.Payload)
-		r.ruleHandle(&tcp.Payload)
+		//这里可能会有多个连接，所以要区分，KEY就是 srcIp:port-dstIp:port
+		//由于 dstIp:port 是一样的，所以需要srcIp:port即可
+		r.ruleHandle(srcIp, tcp)
 	}
 }
