@@ -18,3 +18,8 @@ func filterOfTcpAndDstPort(port uint16) string {
 
 	return fmt.Sprintf("tcp and dst port %v", port)
 }
+
+func filterOfTcpAndPort(port uint16) string {
+
+	return fmt.Sprintf("tcp and port %v", port)
+}

@@ -45,7 +45,7 @@ func newRocketMQHeader() *rocketMQHeader {
 	return res
 }
 
-func readMQProtocol(ch chan *layers.TCP, f func(*rocketMQProtocol, string, tcp_direction_type), name string, capPort int) {
+func readMQProtocol(ch chan *layers.TCP, f func(*rocketMQProtocol, string), capPort int, desc string) {
 
 outer:
 	mq := &rocketMQProtocol{}
@@ -101,14 +101,7 @@ outer:
 					bodyOk = true
 				}
 				if fixOk && headerOk && bodyOk {
-
-					dstPort := int(tcp.DstPort)
-					dire := resp
-					if dstPort == capPort {
-						dire = req
-					}
-
-					f(mq, name, dire)
+					f(mq, desc)
 					//这里已经要注意，数组里可能还有数据呢，所以要继续处理
 					goto outer
 				}

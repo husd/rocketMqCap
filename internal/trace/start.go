@@ -1,7 +1,6 @@
 package trace
 
 import (
-	"fmt"
 	"github.com/google/gopacket/layers"
 	"sync"
 )
@@ -18,7 +17,7 @@ func StartTrace(port int) {
 	for {
 		channelMap.Range(func(key, value interface{}) bool {
 			if _, ok := threadMap.Load(key); !ok {
-				go readMQProtocol(value.(chan *layers.TCP), handleMqMessage, fmt.Sprintf("源IP:端口 %s 监听目的端口: %d", key, port), port)
+				go readMQProtocol(value.(chan *layers.TCP), handleMqMessage, port, key.(string))
 				threadMap.Store(key, true)
 			}
 			return true

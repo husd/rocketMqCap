@@ -37,10 +37,15 @@ func init() {
 	respCodeMsgMap[207] = "Consumer消费消息超时"
 }
 
-func getRespCodeMsg(code int) string {
+func getRespCodeMsg(code int) (string, bool) {
 
 	if code >= 0 && code < 208 {
-		return respCodeMsgMap[code]
+		msg := respCodeMsgMap[code]
+		if len(msg) > 0 {
+			return msg, true
+		} else {
+			return "", false
+		}
 	}
-	return "未知代码"
+	return "未知代码", false
 }

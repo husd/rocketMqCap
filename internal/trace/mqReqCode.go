@@ -8,8 +8,6 @@ var reqCodeMsgMap [317]string = [317]string{}
 
 func init() {
 
-	reqCodeMsgMap[0] = "请求成功"
-
 	reqCodeMsgMap[10] = "Broker 发送消息"
 	reqCodeMsgMap[11] = "Broker 订阅消息"
 	reqCodeMsgMap[12] = "Broker 查询消息"
@@ -58,8 +56,8 @@ func init() {
 	reqCodeMsgMap[208] = "从Broker获取消费状态（进度）"
 	reqCodeMsgMap[209] = "Suspend Consumer消费过程"
 	reqCodeMsgMap[210] = "Resume Consumer消费过程"
-	reqCodeMsgMap[211] = "重置Consumer Offset"
-	reqCodeMsgMap[212] = "重置Consumer Offset"
+	reqCodeMsgMap[211] = "consumer重置Consumer Offset"
+	reqCodeMsgMap[212] = "broker重置Consumer Offset"
 	reqCodeMsgMap[213] = "调整Consumer线程池数量"
 	reqCodeMsgMap[214] = "查询消息被哪些消费组消费"
 	reqCodeMsgMap[215] = "从Broker删除Topic配置"
@@ -67,7 +65,7 @@ func init() {
 	reqCodeMsgMap[217] = "Namesrv 通过 project 获取所有的 server ip 信息"
 	reqCodeMsgMap[218] = "Namesrv 删除指定 project group 下的所有 server ip 信息"
 	reqCodeMsgMap[219] = "通过NameSpace获取所有的KV List"
-	reqCodeMsgMap[220] = "offset 重置"
+	reqCodeMsgMap[220] = "重置consumer客户端的offset"
 	reqCodeMsgMap[221] = "客户端订阅消息"
 	reqCodeMsgMap[222] = "通知 broker 调用 offset 重置处理"
 	reqCodeMsgMap[223] = "通知 broker 调用客户端订阅消息处理"
@@ -91,10 +89,15 @@ func init() {
 	reqCodeMsgMap[316] = "* 发送死信队列 */"
 }
 
-func getReqCodeMsg(code int) string {
+func getReqCodeMsg(code int) (string, bool) {
 
 	if code >= 0 && code < 316 {
-		return reqCodeMsgMap[code]
+		msg := reqCodeMsgMap[code]
+		if len(msg) > 0 {
+			return msg, true
+		} else {
+			return "", false
+		}
 	}
-	return "未知代码"
+	return "", false
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
 	"log"
+	"strconv"
 )
 
 func captureByRule(r *rule) {
@@ -54,7 +55,15 @@ func printDevice(deviceName string, r *rule) {
 		// tcp 层
 		tcp := packet.TransportLayer().(*layers.TCP)
 		ip := packet.NetworkLayer().(*layers.IPv4)
-		srcIp := ip.SrcIP.String()
-		r.ruleHandle(srcIp, tcp)
+		key := getPacketSrcAndDst(tcp, ip, r.port)
+		r.ruleHandle(key, tcp)
 	}
+}
+
+func getPacketSrcAndDst(tcp *layers.TCP, ip *layers.IPv4, port int) string {
+
+	template := "源ip:port %s ~ 目的ip:port %s 监听端口: %d"
+	src := ip.SrcIP.String() + ":" + strconv.Itoa(int(tcp.SrcPort))
+	dst := ip.DstIP.String() + ":" + strconv.Itoa(int(tcp.DstPort))
+	return fmt.Sprintf(template, src, dst, port)
 }

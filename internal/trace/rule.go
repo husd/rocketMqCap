@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/google/gopacket/layers"
+	"sync"
 )
 
 /**
@@ -26,16 +27,15 @@ func NewSend2Broker(ip string, port uint16) *rule {
 	r := &rule{}
 
 	r.name = "发送给broker"
-	r.filter = filterOfTcpAndDstPort(port)
+	r.filter = filterOfTcpAndPort(port)
 	r.ruleHandle = doRuleHandle
 	r.port = int(port)
 
 	return r
 }
 
-func doRuleHandle(srcIp string, tcp *layers.TCP) {
+func doRuleHandle(key string, tcp *layers.TCP) {
 
-	key := srcIp + ":" + tcp.SrcPort.String()
 	var channel chan *layers.TCP
 	if value, ok := channelMap.Load(key); !ok {
 		channel = make(chan *layers.TCP, 1024)
@@ -47,10 +47,14 @@ func doRuleHandle(srcIp string, tcp *layers.TCP) {
 	ch <- tcp
 }
 
-func handleMqMessage(mq *rocketMQProtocol, name string, dire tcp_direction_type) {
+var lock sync.Mutex
 
+func handleMqMessage(mq *rocketMQProtocol, desc string) {
+
+	lock.Lock()
+	defer lock.Unlock()
 	now := now()
-	fmt.Println(now, "------------------------[", name, "]--------------------")
+	fmt.Println(now, "------------------------[", desc, "]--------------------")
 	//fmt.Println(now, " 消息长度 4字节:", mq.length)
 	//fmt.Println(now, " 序列化类型 1字节:", mq.serializationType)
 	//fmt.Println(now, " 消息头长度 3字节:", mq.headerLength)
@@ -60,14 +64,33 @@ func handleMqMessage(mq *rocketMQProtocol, name string, dire tcp_direction_type)
 	if err != nil {
 		fmt.Println(now, "消息头数据 :", header)
 	} else {
-		msg := ""
+		msg, dire := getCodeMsg(mqHeader)
 		if dire == req {
-			msg = getReqCodeMsg(mqHeader.Code)
-			fmt.Println(now, "[", msg, "][请求](", mqHeader.Code, ") 消息头数据 :", header)
+			fmt.Println(now, "[", msg, "][请求][", mqHeader.Code, "] 消息头数据 :", header)
 		} else if dire == resp {
-			msg = getRespCodeMsg(mqHeader.Code)
-			fmt.Println(now, "[", msg, "][响应](", mqHeader.Code, ") 消息头数据 :", header)
+			fmt.Println(now, "[", msg, "][响应][", mqHeader.Code, "] 消息头数据 :", header)
 		}
 	}
-	fmt.Println(now, " 消息主体数据 :", string(mq.messageBody))
+	fmt.Println(now, "[消息主体数据] :", string(mq.messageBody))
+}
+
+func getCodeMsg(header *rocketMQHeader) (string, tcp_direction_type) {
+
+	code := header.Code
+	msgReq, okReq := getReqCodeMsg(code)
+	msgResp, okResp := getRespCodeMsg(code)
+	//都有，看备注信息是否为空了
+	if okReq && okResp {
+		//有备注的，一般是响应报文
+		if len(header.Remark) > 0 {
+			return msgResp, resp
+		} else {
+			return msgReq, req
+		}
+	} else if okResp {
+		return msgResp, resp
+	} else if okReq {
+		return msgReq, req
+	}
+	return msgReq, req
 }
