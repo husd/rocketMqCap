@@ -77,7 +77,7 @@ outer:
 					mq.length = bytesToInt(data[0:max])
 					mq.serializationType = int(data[max])
 					mq.headerLength = bytes3ToInt(data[max+1 : mqprotocol_fix_len])
-					bodyLength = mq.length - mqprotocol_fix_len - mq.headerLength + 4 // 找找原因为什么要+4
+					bodyLength = mq.length - 4 - mq.headerLength
 					mq.header = make([]byte, mq.headerLength)
 					mq.messageBody = make([]byte, bodyLength)
 					fixOk = true
