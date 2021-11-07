@@ -35,7 +35,7 @@ type rocketMQHeader struct {
 	Opaque    int
 	Flag      int
 	Remark    string
-	ExtFields map[string]string
+	ExtFields map[string]interface{}
 }
 
 func newRocketMQHeader() *rocketMQHeader {
