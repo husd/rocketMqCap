@@ -12,7 +12,7 @@ import (
  */
 func main() {
 
-	port := flag.Int("port", 9876, "监听的端口，默认是9876")
+	port := flag.Int("port", 10910, "监听的端口，默认是9876")
 	flag.Parse()
 	fmt.Println("------------- start -----------------port:", *port)
 	trace.StartTrace(*port)
