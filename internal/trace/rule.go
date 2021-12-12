@@ -65,13 +65,13 @@ func handleMqMessage(mq *rocketMQProtocol, desc string) {
 		fmt.Println(now, "消息头数据失败 :", header)
 	} else {
 		msg, dire := getCodeMsg(mqHeader)
-		if dire == req {
-			fmt.Println(now, "[", mqHeader.Code, "][请求][", msg, "] 消息头数据 :", header)
+		if dire == req && mqHeader.Code == 34 {
+			fmt.Println(now, "[", mqHeader.Code, "][请求][", msg, "] 消息头数据 :", header, " 消息体: ", string(mq.messageBody))
 		} else if dire == resp {
-			fmt.Println(now, "[", mqHeader.Code, "][响应][", msg, "] 消息头数据 :", header)
+			//fmt.Println(now, "[", mqHeader.Code, "][响应][", msg, "] 消息头数据 :", header)
 		}
 	}
-	fmt.Println(now, "[消息主体数据] :", string(mq.messageBody))
+	//fmt.Println(now, "[消息主体数据] :", string(mq.messageBody))
 }
 
 func getCodeMsg(header *rocketMQHeader) (string, tcp_direction_type) {
