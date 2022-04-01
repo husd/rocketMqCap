@@ -1,6 +1,9 @@
 package trace
 
-import "github.com/google/gopacket/layers"
+import (
+	"fmt"
+	"github.com/google/gopacket/layers"
+)
 
 /**
  * RocketMQ 的基本通信协议
@@ -28,7 +31,16 @@ type rocketMQProtocol struct {
 	direction tcp_direction_type
 }
 
+type Demo struct {
+	Name string
+}
+
+func (p *Demo) print() {
+	fmt.Println()
+}
+
 type rocketMQHeader struct {
+	*Demo
 	Code      int
 	Language  string
 	Version   int
@@ -38,10 +50,22 @@ type rocketMQHeader struct {
 	ExtFields map[string]interface{}
 }
 
+func (p *rocketMQHeader) print() {
+	fmt.Println(p.Code)
+}
+
+type uu func(u int)
+
+func (p *rocketMQHeader) print2(val uu) {
+	val(5)
+}
+
 func newRocketMQHeader() *rocketMQHeader {
 
 	res := &rocketMQHeader{}
+	res.print()
 
+	res.Name = "123"
 	return res
 }
 
